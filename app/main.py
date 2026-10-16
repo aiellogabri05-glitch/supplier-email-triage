@@ -33,13 +33,15 @@ class ClassifyOut(BaseModel):
 
 @lru_cache
 def get_classifier() -> Classifier:
-    api_key = os.environ.get("OPENAI_API_KEY", "")
+    api_key = os.environ.get("LLM_API_KEY", "")
     if not api_key:
-        raise HTTPException(status_code=503, detail="OPENAI_API_KEY is not set")
+        raise HTTPException(status_code=503, detail="LLM_API_KEY is not set")
     from openai import OpenAI  # imported here so tests do not need a key or network
 
-    model = os.environ.get("OPENAI_MODEL", "gpt-4.1-mini")
-    return Classifier(client=OpenAI(api_key=api_key), model=model)
+    model = os.environ.get("LLM_MODEL", "gpt-4.1-mini")
+    # LLM_BASE_URL points the OpenAI-compatible client at a provider; empty means OpenAI itself.
+    base_url = os.environ.get("LLM_BASE_URL") or None
+    return Classifier(client=OpenAI(api_key=api_key, base_url=base_url), model=model)
 
 
 def get_threshold() -> float:

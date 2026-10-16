@@ -93,11 +93,11 @@ def test_missing_email_id_is_rejected(client):
 
 
 def test_without_api_key_the_endpoint_says_so(client, monkeypatch):
-    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("LLM_API_KEY", raising=False)
     get_classifier.cache_clear()
     response = client.post("/classify", json={"email_id": "e5", "subject": "s", "body": "b"})
     assert response.status_code == 503
-    assert "OPENAI_API_KEY" in response.json()["detail"]
+    assert "LLM_API_KEY" in response.json()["detail"]
 
 
 def test_health(client):

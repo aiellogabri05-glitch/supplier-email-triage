@@ -6,7 +6,7 @@ Use only test emails sent between your own accounts. Never send messages to real
 
 ## Setup
 
-1. Install Docker Desktop, then `cp .env.example .env` and set `OPENAI_API_KEY`.
+1. Install Docker Desktop, then `cp .env.example .env` and set `LLM_API_KEY`, `LLM_BASE_URL` and `LLM_MODEL` for the provider you use (see `.env.example`).
 2. `docker compose up -d --build` starts the API on http://localhost:8000 and n8n on http://localhost:5678.
 3. Check the API: `curl localhost:8000/health`, then classify one email:
    `curl -X POST localhost:8000/classify -H "Content-Type: application/json" -d '{"email_id":"t1","subject":"Invoice INV-1 for PO-48213","body":"Attached.","sender":"billing@supplier.example"}'`
