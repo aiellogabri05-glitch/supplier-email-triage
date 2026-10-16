@@ -1,6 +1,6 @@
-# Supplier email triage: n8n + FastAPI + OpenAI
+# Supplier email triage: n8n + FastAPI + NVIDIA NIM
 
-Supplier emails arrive in one test inbox. An n8n workflow reads each one, sends it to a FastAPI endpoint that classifies it with the OpenAI API (structured output), and routes it: invoices and quotes to Google Sheets, delays and backorders to Slack, and low-confidence or uncategorised emails to a review sheet. Every decision is logged as a row.
+Supplier emails arrive in one test inbox. An n8n workflow reads each one, sends it to a FastAPI endpoint that classifies it with an LLM through NVIDIA NIM's OpenAI-compatible API (structured output, model `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` in the tested setup), and routes it: invoices and quotes to Google Sheets, delays and backorders to Slack, and low-confidence or uncategorised emails to a review sheet. Every decision is logged as a row.
 
 Use only test emails sent between your own accounts. Never send messages to real suppliers.
 
@@ -32,12 +32,12 @@ An email goes to review when its category is `other` or its confidence is below 
 ## Files
 
 - `app/main.py`: FastAPI app and `/classify`.
-- `app/classifier.py`: OpenAI call, injected client for tests.
+- `app/classifier.py`: LLM call through the OpenAI-compatible client, injected for tests.
 - `app/schema.py`: category list, schema, and reply parsing.
 - `app/routing.py`: confidence rule and route keys.
 - `n8n/workflow.json`: exported n8n workflow (IMAP trigger, HTTP call, Switch, Sheets/Slack, log).
 - `scripts/run_eval.py`: accuracy measurement on `tests/fixtures/labelled_emails.json` (needs a key).
-- `tests/`: parsing, routing and endpoint tests. The OpenAI client is faked.
+- `tests/`: parsing, routing and endpoint tests. The LLM client is faked.
 
 ## Known limits
 
