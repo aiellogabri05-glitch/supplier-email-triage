@@ -1,0 +1,40 @@
+  t01 attempt 1/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+t01 expected=invoice got=invoice conf=0.99 order=PO-48213 review=False
+  t02 attempt 1/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+t02 expected=invoice got=invoice conf=0.95 order=None review=False
+  t03 attempt 1/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+t03 expected=delay got=delay conf=0.95 order=77120 review=False
+  t04 attempt 1/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+  t04 attempt 2/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+  t04 attempt 3/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+t04 expected=delay got=delay conf=0.95 order=None review=False
+t05 expected=backorder got=backorder conf=0.96 order=#55018 review=False
+t06 expected=backorder got=backorder conf=0.95 order=None review=False
+  t07 attempt 1/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+t07 expected=quote got=quote conf=0.99 order=None review=False
+t08 expected=quote got=quote conf=0.95 order=None review=False
+  t09 attempt 1/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+t09 expected=other got=other conf=0.95 order=None review=True
+t10 expected=other got=other conf=0.95 order=None review=True
+  t11 attempt 1/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+  t11 attempt 2/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+  t11 attempt 3/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (314/16)', 'type': 
+  t11 attempt 4/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+  t11 attempt 5/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+  t12 attempt 1/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+t12 expected=other got=other conf=0.50 order=None review=True
+t13 expected=invoice got=invoice conf=0.99 order=PO-48190 review=False
+  t14 attempt 1/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+  t14 attempt 2/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': '
+t14 expected=backorder got=backorder conf=0.90 order=None review=False
+  t15 attempt 1/5 failed: InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (213/16)', 'type': 
+t15 expected=quote got=quote conf=0.88 order=PO-48300 review=False
+
+labelled emails in set: 15; classified successfully: 14; failed: 1
+model: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning; threshold: 0.75
+category accuracy: 14/14 = 100.0%
+order-number accuracy: 4/6 emails that have an order number
+sent to review: 3/14
+mean seconds per classified email (incl. retries): 44.59
+failed emails: t11 (InternalServerError: Error code: 503 - {'error': {'message': 'ResourceExhausted: Worker local total request limit reached (16/16)', 'type': ')
+[exit 0]
