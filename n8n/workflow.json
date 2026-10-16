@@ -1,0 +1,278 @@
+{
+  "name": "Supplier email triage",
+  "nodes": [
+    {
+      "parameters": {
+        "mailbox": "INBOX",
+        "postProcessAction": "read",
+        "options": {}
+      },
+      "id": "a1b2c001-0000-4000-8000-000000000001",
+      "name": "Email trigger",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [-1200, 300],
+      "credentials": {
+        "imap": { "id": "REPLACE_WITH_IMAP_CREDENTIAL_ID", "name": "Test mailbox (IMAP)" }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.TRIAGE_API_URL }}/classify",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ email_id: String($json.messageId || $json.uid || $json.id), subject: $json.subject || '', body: $json.text || '', sender: typeof $json.from === 'string' ? $json.from : JSON.stringify($json.from || '') }) }}",
+        "options": { "timeout": 60000 }
+      },
+      "id": "a1b2c002-0000-4000-8000-000000000002",
+      "name": "Classify email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-960, 300]
+    },
+    {
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "outputKey": "invoices_sheet",
+              "conditions": {
+                "options": { "caseSensitive": true, "typeValidation": "strict" },
+                "conditions": [
+                  { "leftValue": "={{ $json.route }}", "rightValue": "invoices_sheet", "operator": { "type": "string", "operation": "equals" } }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            },
+            {
+              "outputKey": "quotes_sheet",
+              "conditions": {
+                "options": { "caseSensitive": true, "typeValidation": "strict" },
+                "conditions": [
+                  { "leftValue": "={{ $json.route }}", "rightValue": "quotes_sheet", "operator": { "type": "string", "operation": "equals" } }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            },
+            {
+              "outputKey": "delays_slack",
+              "conditions": {
+                "options": { "caseSensitive": true, "typeValidation": "strict" },
+                "conditions": [
+                  { "leftValue": "={{ $json.route }}", "rightValue": "delays_slack", "operator": { "type": "string", "operation": "equals" } }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            },
+            {
+              "outputKey": "backorders_slack",
+              "conditions": {
+                "options": { "caseSensitive": true, "typeValidation": "strict" },
+                "conditions": [
+                  { "leftValue": "={{ $json.route }}", "rightValue": "backorders_slack", "operator": { "type": "string", "operation": "equals" } }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            },
+            {
+              "outputKey": "review_sheet",
+              "conditions": {
+                "options": { "caseSensitive": true, "typeValidation": "strict" },
+                "conditions": [
+                  { "leftValue": "={{ $json.route }}", "rightValue": "review_sheet", "operator": { "type": "string", "operation": "equals" } }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c003-0000-4000-8000-000000000003",
+      "name": "Route by category",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [-720, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "mode": "id", "value": "REPLACE_WITH_TEST_SHEET_ID" },
+        "sheetName": { "__rl": true, "mode": "name", "value": "Invoices" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email_id": "={{ $('Classify email').item.json.email_id }}",
+            "subject": "={{ $('Email trigger').item.json.subject }}",
+            "sender": "={{ $('Email trigger').item.json.from }}",
+            "order_number": "={{ $('Classify email').item.json.order_number }}",
+            "confidence": "={{ $('Classify email').item.json.confidence }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "a1b2c004-0000-4000-8000-000000000004",
+      "name": "Invoices sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-420, 80],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "REPLACE_WITH_GOOGLE_CREDENTIAL_ID", "name": "Google Sheets test account" }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "mode": "id", "value": "REPLACE_WITH_TEST_SHEET_ID" },
+        "sheetName": { "__rl": true, "mode": "name", "value": "Quotes" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email_id": "={{ $('Classify email').item.json.email_id }}",
+            "subject": "={{ $('Email trigger').item.json.subject }}",
+            "sender": "={{ $('Email trigger').item.json.from }}",
+            "order_number": "={{ $('Classify email').item.json.order_number }}",
+            "confidence": "={{ $('Classify email').item.json.confidence }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "a1b2c005-0000-4000-8000-000000000005",
+      "name": "Quotes sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-420, 200],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "REPLACE_WITH_GOOGLE_CREDENTIAL_ID", "name": "Google Sheets test account" }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": { "__rl": true, "mode": "id", "value": "REPLACE_WITH_TEST_CHANNEL_ID" },
+        "text": "={{ 'Delay email (' + $('Classify email').item.json.email_id + '): ' + $('Email trigger').item.json.subject + ' | order ' + ($('Classify email').item.json.order_number || 'n/a') + ' | confidence ' + $('Classify email').item.json.confidence }}",
+        "otherOptions": {}
+      },
+      "id": "a1b2c006-0000-4000-8000-000000000006",
+      "name": "Delays Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [-420, 320],
+      "credentials": {
+        "slackApi": { "id": "REPLACE_WITH_SLACK_CREDENTIAL_ID", "name": "Slack test workspace" }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": { "__rl": true, "mode": "id", "value": "REPLACE_WITH_TEST_CHANNEL_ID" },
+        "text": "={{ 'Backorder email (' + $('Classify email').item.json.email_id + '): ' + $('Email trigger').item.json.subject + ' | order ' + ($('Classify email').item.json.order_number || 'n/a') + ' | confidence ' + $('Classify email').item.json.confidence }}",
+        "otherOptions": {}
+      },
+      "id": "a1b2c007-0000-4000-8000-000000000007",
+      "name": "Backorders Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [-420, 440],
+      "credentials": {
+        "slackApi": { "id": "REPLACE_WITH_SLACK_CREDENTIAL_ID", "name": "Slack test workspace" }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "mode": "id", "value": "REPLACE_WITH_TEST_SHEET_ID" },
+        "sheetName": { "__rl": true, "mode": "name", "value": "Review" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email_id": "={{ $('Classify email').item.json.email_id }}",
+            "subject": "={{ $('Email trigger').item.json.subject }}",
+            "sender": "={{ $('Email trigger').item.json.from }}",
+            "category": "={{ $('Classify email').item.json.category }}",
+            "confidence": "={{ $('Classify email').item.json.confidence }}",
+            "reason": "={{ $('Classify email').item.json.reason }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "a1b2c008-0000-4000-8000-000000000008",
+      "name": "Review sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-420, 560],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "REPLACE_WITH_GOOGLE_CREDENTIAL_ID", "name": "Google Sheets test account" }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "mode": "id", "value": "REPLACE_WITH_TEST_SHEET_ID" },
+        "sheetName": { "__rl": true, "mode": "name", "value": "Decision log" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "logged_at": "={{ $now.toISO() }}",
+            "email_id": "={{ $('Classify email').item.json.email_id }}",
+            "category": "={{ $('Classify email').item.json.category }}",
+            "confidence": "={{ $('Classify email').item.json.confidence }}",
+            "route": "={{ $('Classify email').item.json.route }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "a1b2c009-0000-4000-8000-000000000009",
+      "name": "Decision log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [-120, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "REPLACE_WITH_GOOGLE_CREDENTIAL_ID", "name": "Google Sheets test account" }
+      }
+    }
+  ],
+  "connections": {
+    "Email trigger": {
+      "main": [[{ "node": "Classify email", "type": "main", "index": 0 }]]
+    },
+    "Classify email": {
+      "main": [[{ "node": "Route by category", "type": "main", "index": 0 }]]
+    },
+    "Route by category": {
+      "main": [
+        [{ "node": "Invoices sheet", "type": "main", "index": 0 }],
+        [{ "node": "Quotes sheet", "type": "main", "index": 0 }],
+        [{ "node": "Delays Slack", "type": "main", "index": 0 }],
+        [{ "node": "Backorders Slack", "type": "main", "index": 0 }],
+        [{ "node": "Review sheet", "type": "main", "index": 0 }]
+      ]
+    },
+    "Invoices sheet": {
+      "main": [[{ "node": "Decision log", "type": "main", "index": 0 }]]
+    },
+    "Quotes sheet": {
+      "main": [[{ "node": "Decision log", "type": "main", "index": 0 }]]
+    },
+    "Delays Slack": {
+      "main": [[{ "node": "Decision log", "type": "main", "index": 0 }]]
+    },
+    "Backorders Slack": {
+      "main": [[{ "node": "Decision log", "type": "main", "index": 0 }]]
+    },
+    "Review sheet": {
+      "main": [[{ "node": "Decision log", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "1",
+  "meta": { "templateCredsSetupCompleted": false }
+}

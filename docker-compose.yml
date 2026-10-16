@@ -1,0 +1,26 @@
+# Local test stack: the classifier API and n8n. Use only test mail from your own accounts.
+# Pin the n8n image to the version you tested on; "latest" is used here for convenience.
+
+services:
+  api:
+    build: .
+    env_file: .env
+    ports:
+      - "8000:8000"
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    depends_on:
+      - api
+    env_file: .env
+    environment:
+      N8N_SECURE_COOKIE: "false"
+      # Inside the compose network the API is reached by service name.
+      TRIAGE_API_URL: http://api:8000
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n-data:/home/node/.n8n
+
+volumes:
+  n8n-data:
